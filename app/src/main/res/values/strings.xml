@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Veritrans SDK Sample</string>
+    <string name="buy">Buy</string>
+    <string name="buy_with_core">Use Core flow</string>
+    <string name="buy_with_ui">Use UI flow</string>
+    <string name="buy_with_credit_card">Buy using credit card</string>
+    <string name="buy_with_permata_va">Buy using Permata VA</string>
+    <string name="buy_with_mandiri_bill">Buy using Mandiri Bill</string>
+    <string name="activity_title_credit_card">Pay with Credit/Debit Card</string>
+    <string name="activity_title_permata_va">Pay with Bank Transfer</string>
+    <string name="activity_title_mandiri_bill">Pay with Mandiri Bill</string>
+</resources>
