@@ -11,40 +11,28 @@ import android.widget.EditText;
 
 import org.greenrobot.eventbus.Subscribe;
 
-import java.util.ArrayList;
-import java.util.UUID;
-
-import id.co.veritrans.sdk.core.TransactionRequest;
 import id.co.veritrans.sdk.core.VeritransSDK;
 import id.co.veritrans.sdk.eventbus.bus.VeritransBusProvider;
-import id.co.veritrans.sdk.eventbus.callback.TokenBusCallback;
-import id.co.veritrans.sdk.eventbus.callback.TransactionBusCallback;
+import id.co.veritrans.sdk.eventbus.callback.CardRegistrationBusCallback;
+import id.co.veritrans.sdk.eventbus.callback.SaveCardBusCallback;
+import id.co.veritrans.sdk.eventbus.events.CardRegistrationFailedEvent;
+import id.co.veritrans.sdk.eventbus.events.CardRegistrationSuccessEvent;
 import id.co.veritrans.sdk.eventbus.events.GeneralErrorEvent;
-import id.co.veritrans.sdk.eventbus.events.GetTokenFailedEvent;
-import id.co.veritrans.sdk.eventbus.events.GetTokenSuccessEvent;
 import id.co.veritrans.sdk.eventbus.events.NetworkUnavailableEvent;
-import id.co.veritrans.sdk.eventbus.events.TransactionFailedEvent;
-import id.co.veritrans.sdk.eventbus.events.TransactionSuccessEvent;
-import id.co.veritrans.sdk.models.BillingAddress;
-import id.co.veritrans.sdk.models.CardPaymentDetails;
-import id.co.veritrans.sdk.models.CardTokenRequest;
-import id.co.veritrans.sdk.models.CardTransfer;
-import id.co.veritrans.sdk.models.CustomerDetails;
-import id.co.veritrans.sdk.models.ItemDetails;
-import id.co.veritrans.sdk.models.ShippingAddress;
-import id.co.veritrans.sdk.models.TransactionDetails;
+import id.co.veritrans.sdk.eventbus.events.SaveCardFailedEvent;
+import id.co.veritrans.sdk.eventbus.events.SaveCardSuccessEvent;
+import id.co.veritrans.sdk.models.SaveCardRequest;
 
-public class CreditCardPaymentActivity extends AppCompatActivity implements TokenBusCallback, TransactionBusCallback{
-
+public class CardRegistrationActivity extends AppCompatActivity implements CardRegistrationBusCallback, SaveCardBusCallback {
     TextInputLayout cardNumberContainer, cvvContainer, expiredDateContainer;
     EditText cardNumber, cvv, expiredDate;
-    Button payBtn;
+    Button saveBtn;
     ProgressDialog dialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_credit_card_payment);
+        setContentView(R.layout.activity_card_registration);
         // Register this class into event bus
         VeritransBusProvider.getInstance().register(this);
         initView();
@@ -70,8 +58,8 @@ public class CreditCardPaymentActivity extends AppCompatActivity implements Toke
         cardNumber = (EditText)findViewById(R.id.card_number);
         cvv = (EditText)findViewById(R.id.cvv_number);
         expiredDate = (EditText)findViewById(R.id.exp_date);
-        payBtn = (Button)findViewById(R.id.btn_payment);
-        payBtn.setOnClickListener(new View.OnClickListener() {
+        saveBtn = (Button)findViewById(R.id.btn_save);
+        saveBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // Refresh validator
@@ -80,14 +68,10 @@ public class CreditCardPaymentActivity extends AppCompatActivity implements Toke
                     dialog.show();
                     // Create token request before payment
                     String date = expiredDate.getText().toString();
-                    CardTokenRequest cardTokenRequest = new CardTokenRequest(
-                            // Card number
-                            cardNumber.getText().toString(),
+                    VeritransSDK.getVeritransSDK().cardRegistration(cardNumber.getText().toString(),
                             cvv.getText().toString(),
                             date.split("/")[0],
-                            date.split("/")[1],
-                            VeritransSDK.getVeritransSDK().getClientKey());
-                    VeritransSDK.getVeritransSDK().getToken(cardTokenRequest);
+                            "20" + date.split("/")[1]);
                 }
             }
         });
@@ -142,6 +126,30 @@ public class CreditCardPaymentActivity extends AppCompatActivity implements Toke
 
     @Subscribe
     @Override
+    public void onEvent(CardRegistrationSuccessEvent cardRegistrationSuccessEvent) {
+        // Handle card registration success
+        SaveCardRequest request = new SaveCardRequest();
+        request.setCode(cardRegistrationSuccessEvent.getResponse().getStatusCode());
+        request.setSavedTokenId(cardRegistrationSuccessEvent.getResponse().getSavedTokenId());
+        request.setMaskedCard(cardRegistrationSuccessEvent.getResponse().getMaskedCard());
+        request.setTransactionId(cardRegistrationSuccessEvent.getResponse().getTransactionId());
+
+        VeritransSDK.getVeritransSDK().saveCards(request);
+    }
+
+    @Subscribe
+    @Override
+    public void onEvent(CardRegistrationFailedEvent cardRegistrationFailedEvent) {
+        // Handle card registration failed
+        dialog.dismiss();
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setMessage(cardRegistrationFailedEvent.getMessage())
+                .create();
+        dialog.show();
+    }
+
+    @Subscribe
+    @Override
     public void onEvent(NetworkUnavailableEvent networkUnavailableEvent) {
         // Handle network not available condition
         dialog.dismiss();
@@ -164,59 +172,21 @@ public class CreditCardPaymentActivity extends AppCompatActivity implements Toke
 
     @Subscribe
     @Override
-    public void onEvent(TransactionSuccessEvent transactionSuccessEvent) {
-        // Handle success transaction
+    public void onEvent(SaveCardSuccessEvent saveCardSuccessEvent) {
         dialog.dismiss();
         AlertDialog dialog = new AlertDialog.Builder(this)
-                .setMessage("Payment is Successful")
+                .setMessage("Card is successfully registered")
                 .create();
         dialog.show();
     }
 
     @Subscribe
     @Override
-    public void onEvent(TransactionFailedEvent transactionFailedEvent) {
-        // Handle failed transaction
+    public void onEvent(SaveCardFailedEvent saveCardFailedEvent) {
+        // Handle card registration failed
         dialog.dismiss();
         AlertDialog dialog = new AlertDialog.Builder(this)
-                .setMessage(transactionFailedEvent.getMessage())
-                .create();
-        dialog.show();
-    }
-
-    @Subscribe
-    @Override
-    public void onEvent(GetTokenSuccessEvent getTokenSuccessEvent) {
-        // Handle get token success
-        // Do the charge/payment
-        String orderId = UUID.randomUUID().toString();
-        TransactionRequest request = new TransactionRequest(orderId.toString(), 360000);
-        request.setCardPaymentInfo(getString(R.string.card_click_type_none), false);
-        VeritransSDK.getVeritransSDK().setTransactionRequest(request);
-        ItemDetails itemDetails = new ItemDetails("1", 360000, 1, "shoes");
-        ArrayList<ItemDetails> itemDetailsArrayList = new ArrayList<>();
-        itemDetailsArrayList.add(itemDetails);
-        CardTransfer transfer = new CardTransfer(
-                new CardPaymentDetails(
-                        getTokenSuccessEvent.getResponse().getBank(),
-                        getTokenSuccessEvent.getResponse().getTokenId(),
-                        false),
-                new TransactionDetails("360000", orderId),
-                itemDetailsArrayList,
-                new ArrayList<BillingAddress>(),
-                new ArrayList<ShippingAddress>(),
-                new CustomerDetails("Raka", "Mogandhi", "westumogandhi@gmail.com", "6285653956354")
-        );
-        VeritransSDK.getVeritransSDK().paymentUsingCard(transfer);
-    }
-
-    @Subscribe
-    @Override
-    public void onEvent(GetTokenFailedEvent getTokenFailedEvent) {
-        // Handle error when get token 
-        dialog.dismiss();
-        AlertDialog dialog = new AlertDialog.Builder(this)
-                .setMessage(getTokenFailedEvent.getMessage())
+                .setMessage(saveCardFailedEvent.getMessage())
                 .create();
         dialog.show();
     }

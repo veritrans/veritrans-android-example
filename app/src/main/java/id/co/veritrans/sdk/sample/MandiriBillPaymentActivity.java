@@ -111,6 +111,7 @@ public class MandiriBillPaymentActivity extends AppCompatActivity implements Tra
     @Override
     public void onEvent(GeneralErrorEvent generalErrorEvent) {
         // Handle generic error condition
+        dialog.dismiss();
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setMessage("Unknown error: " + generalErrorEvent.getMessage())
                 .create();

@@ -20,16 +20,18 @@ import id.co.veritrans.sdk.eventbus.events.GeneralErrorEvent;
 import id.co.veritrans.sdk.eventbus.events.NetworkUnavailableEvent;
 import id.co.veritrans.sdk.eventbus.events.TransactionFailedEvent;
 import id.co.veritrans.sdk.eventbus.events.TransactionSuccessEvent;
+import id.co.veritrans.sdk.models.BillInfoModel;
+import id.co.veritrans.sdk.models.DescriptionModel;
 import id.co.veritrans.sdk.models.ItemDetails;
 
-public class PermataVAPaymentActivity extends AppCompatActivity implements TransactionBusCallback {
+public class CIMCBClickPaymentActivity extends AppCompatActivity implements TransactionBusCallback {
     Button payBtn;
     ProgressDialog dialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_permata_vapayment);
+        setContentView(R.layout.activity_cimcbclick_payment);
         // Register this class into event bus
         VeritransBusProvider.getInstance().register(this);
         initView();
@@ -63,10 +65,15 @@ public class PermataVAPaymentActivity extends AppCompatActivity implements Trans
                 ArrayList<ItemDetails> itemDetailsArrayList = new ArrayList<>();
                 itemDetailsArrayList.add(itemDetails);
                 request.setItemDetails(itemDetailsArrayList);
+                // bill info
+                BillInfoModel billInfoModel = new BillInfoModel("demo_label", "demo_value");
+                request.setBillInfoModel(billInfoModel);
                 // Set transaction request
                 VeritransSDK.getVeritransSDK().setTransactionRequest(request);
                 // Do payment
-                VeritransSDK.getVeritransSDK().paymentUsingPermataBank();
+                VeritransSDK.getVeritransSDK().paymentUsingCIMBClickPay(new DescriptionModel(
+                        "Random description: " + UUID.randomUUID().toString()
+                ));
             }
         });
     }

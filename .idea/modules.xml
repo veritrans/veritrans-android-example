@@ -3,7 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/veritrans-sdk-sample.iml" filepath="$PROJECT_DIR$/veritrans-sdk-sample.iml" />
+      <module fileurl="file://$PROJECT_DIR$/veritrans-android-example.iml" filepath="$PROJECT_DIR$/veritrans-android-example.iml" />
     </modules>
   </component>
 </project>

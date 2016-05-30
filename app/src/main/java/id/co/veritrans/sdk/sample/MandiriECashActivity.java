@@ -20,16 +20,18 @@ import id.co.veritrans.sdk.eventbus.events.GeneralErrorEvent;
 import id.co.veritrans.sdk.eventbus.events.NetworkUnavailableEvent;
 import id.co.veritrans.sdk.eventbus.events.TransactionFailedEvent;
 import id.co.veritrans.sdk.eventbus.events.TransactionSuccessEvent;
+import id.co.veritrans.sdk.models.BillInfoModel;
+import id.co.veritrans.sdk.models.DescriptionModel;
 import id.co.veritrans.sdk.models.ItemDetails;
 
-public class PermataVAPaymentActivity extends AppCompatActivity implements TransactionBusCallback {
+public class MandiriECashActivity extends AppCompatActivity implements TransactionBusCallback {
     Button payBtn;
     ProgressDialog dialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_permata_vapayment);
+        setContentView(R.layout.activity_mandiri_ecash);
         // Register this class into event bus
         VeritransBusProvider.getInstance().register(this);
         initView();
@@ -63,10 +65,14 @@ public class PermataVAPaymentActivity extends AppCompatActivity implements Trans
                 ArrayList<ItemDetails> itemDetailsArrayList = new ArrayList<>();
                 itemDetailsArrayList.add(itemDetails);
                 request.setItemDetails(itemDetailsArrayList);
+                // Set Bill Info
+                request.setBillInfoModel(new BillInfoModel("Bill Info Sample", "Bill Info Sample 2"));
                 // Set transaction request
                 VeritransSDK.getVeritransSDK().setTransactionRequest(request);
                 // Do payment
-                VeritransSDK.getVeritransSDK().paymentUsingPermataBank();
+                VeritransSDK.getVeritransSDK().paymentUsingMandiriECash(new DescriptionModel(
+                        "Sample description"
+                ));
             }
         });
     }
