@@ -7,6 +7,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.RadioButton;
 import android.widget.TextView;
 
 import org.greenrobot.eventbus.Subscribe;
@@ -46,6 +47,7 @@ public class MainActivity extends AppCompatActivity implements GetAuthentication
             coreBCAKlikButton, uiBCAKlikButton,
             coreCardRegistration, uiCardRegistration,
             getAuthenticationToken;
+    private RadioButton normal, twoClick, oneClick;
     private ArrayList<PaymentMethodsModel> selectedPaymentMethods;
 
     @Override
@@ -108,6 +110,11 @@ public class MainActivity extends AppCompatActivity implements GetAuthentication
         dialog.setIndeterminate(true);
         dialog.setMessage("Loading");
 
+        // Initialize radio button
+        normal = (RadioButton) findViewById(R.id.radio_card_normal);
+        twoClick = (RadioButton) findViewById(R.id.radio_card_two_click);
+        oneClick = (RadioButton) findViewById(R.id.radio_card_one_click);
+
         // Handle Credit Card Payment using Core Flow
         coreCreditButton = (Button) findViewById(R.id.btn_credit_core);
         coreCreditButton.setOnClickListener(new View.OnClickListener() {
@@ -133,9 +140,16 @@ public class MainActivity extends AppCompatActivity implements GetAuthentication
                 VeritransSDK.getVeritransSDK().setSelectedPaymentMethods(selectedPaymentMethods);
 
                 // Create transaction request
+                String cardClickType = "";
+                if (normal.isChecked()) {
+                    cardClickType = getString(R.string.card_click_type_none);
+                } else if (twoClick.isChecked()) {
+                    cardClickType = getString(R.string.card_click_type_two_click);
+                } else {
+                    cardClickType = getString(R.string.card_click_type_one_click);
+                }
                 TransactionRequest transactionRequestNew = initializePurchaseRequest();
-                transactionRequestNew.setCardPaymentInfo(getString(R.string.card_click_type_none),
-                        true);
+                transactionRequestNew.setCardPaymentInfo(cardClickType, true);
                 // Set transaction request
                 VeritransSDK.getVeritransSDK().setTransactionRequest(transactionRequestNew);
 
