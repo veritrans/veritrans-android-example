@@ -48,7 +48,7 @@ dependencies {
     }
     // External scanner
     compile 'id.co.veritrans:scancard:0.10.2'
-    
+
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.4.0'
     compile 'com.android.support:design:23.4.0'
