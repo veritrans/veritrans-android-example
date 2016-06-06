@@ -68,7 +68,8 @@ public class MainActivityBehaviorTest {
     }
 
     public void runPrologue() {
-        if (((Button) mActivityRule.getActivity().findViewById(R.id.btn_get_token)).getText().equals("Get Token") || ((Button) mActivityRule.getActivity().findViewById(R.id.btn_get_token)).getText().equals("GET TOKEN")) {
+        if (((Button) mActivityRule.getActivity().findViewById(R.id.btn_get_token)).getText().equals("Get Token")
+                || ((Button) mActivityRule.getActivity().findViewById(R.id.btn_get_token)).getText().equals("GET TOKEN")) {
             // Click get authentication token first
             onView(withId(R.id.btn_get_token)).perform(click());
 
