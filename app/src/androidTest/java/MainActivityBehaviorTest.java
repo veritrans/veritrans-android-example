@@ -5,7 +5,7 @@ import android.support.test.espresso.web.webdriver.Locator;
 import android.support.test.filters.LargeTest;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
-import android.view.View;
+import android.widget.Button;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -68,14 +68,14 @@ public class MainActivityBehaviorTest {
     }
 
     public void runPrologue() {
-        if (mActivityRule.getActivity().findViewById(R.id.btn_get_token).getVisibility() == View.VISIBLE) {
+        if (((Button) mActivityRule.getActivity().findViewById(R.id.btn_get_token)).getText().equals("Get Token") || ((Button) mActivityRule.getActivity().findViewById(R.id.btn_get_token)).getText().equals("GET TOKEN")) {
             // Click get authentication token first
             onView(withId(R.id.btn_get_token)).perform(click());
 
             // Wait until get token finished
             SystemClock.sleep(2000);
             // Go to credit card
-            onView(withId(R.id.btn_credit_ui)).perform(scrollTo(), click());
+            onView(withId(R.id.show_ui_flow)).perform(scrollTo(), click());
 
             // Fill consumer name
             onView(withId(R.id.et_full_name)).perform(clearText(), typeText(fullName), closeSoftKeyboard());
@@ -102,8 +102,8 @@ public class MainActivityBehaviorTest {
     public void creditCardFlowTest() {
         // Initializing credit card payment
         onView(withId(R.id.radio_card_two_click)).perform(scrollTo(), click());
-        onView(ViewMatchers.withId(R.id.btn_credit_ui)).perform(scrollTo(), click());
-        onView(withId(R.id.rv_payment_methods)).perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
+        onView(ViewMatchers.withId(R.id.show_ui_flow)).perform(scrollTo(), click());
+        onView(withId(R.id.rv_payment_methods)).perform(RecyclerViewActions.actionOnItemAtPosition(1, click()));
 
         // Fill credit card data
         onView(withId(R.id.et_card_no)).perform(typeText(cardNo), closeSoftKeyboard()).check(matches(withText(cardNoExpected)));
@@ -134,8 +134,8 @@ public class MainActivityBehaviorTest {
     @Test
     public void bankTransferFlowTest() {
         //Initializing bank transfer payment
-        onView(withId(R.id.btn_bca_va_ui)).perform(scrollTo(), click());
-        onView(withId(R.id.rv_payment_methods)).perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
+        onView(withId(R.id.show_ui_flow)).perform(scrollTo(), click());
+        onView(withId(R.id.rv_payment_methods)).perform(RecyclerViewActions.scrollToPosition(10), RecyclerViewActions.actionOnItemAtPosition(8, click()));
         onView(withId(R.id.rv_bank_list)).perform(RecyclerViewActions.actionOnItemAtPosition(1, click()));
 
         //Check email address text
@@ -157,8 +157,8 @@ public class MainActivityBehaviorTest {
     @Test
     public void bcaFlowTest() {
         //Initializing bank transfer payment
-        onView(withId(R.id.btn_bca_va_ui)).perform(scrollTo(), click());
-        onView(withId(R.id.rv_payment_methods)).perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
+        onView(withId(R.id.show_ui_flow)).perform(scrollTo(), click());
+        onView(withId(R.id.rv_payment_methods)).perform(RecyclerViewActions.scrollToPosition(10), RecyclerViewActions.actionOnItemAtPosition(8, click()));
         onView(withId(R.id.rv_bank_list)).perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
 
         //Check email address text

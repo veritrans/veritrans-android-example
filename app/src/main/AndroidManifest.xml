@@ -18,6 +18,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".core.CoreFlowActivity" />
         <activity android:name=".CreditCardPaymentActivity" />
         <activity android:name=".PermataVAPaymentActivity" />
         <activity android:name=".MandiriBillPaymentActivity" />
@@ -28,7 +29,7 @@
         <activity android:name=".IndomaretPaymentActivity" />
         <activity android:name=".MandiriECashActivity" />
         <activity android:name=".BCAKlikPayActivity" />
-        <activity android:name=".CardRegistrationActivity"></activity>
+        <activity android:name=".CardRegistrationActivity" />
     </application>
 
 </manifest>
