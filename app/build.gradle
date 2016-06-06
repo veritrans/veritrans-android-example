@@ -40,10 +40,10 @@ android {
 }
 
 dependencies {
-    developmentCompile('id.co.veritrans:androidsdk:0.10.2-SANDBOX') {
+    developmentCompile('id.co.veritrans:androidsdk:0.10.3-SANDBOX') {
         exclude group: 'com.android.support'
     }
-    productionCompile('id.co.veritrans:androidsdk:0.10.2') {
+    productionCompile('id.co.veritrans:androidsdk:0.10.3') {
         exclude group: 'com.android.support'
     }
     // External scanner

@@ -1,10 +1,16 @@
 <resources>
     <string name="app_name">Veritrans SDK Sample</string>
     <string name="buy">Buy</string>
-    <string name="btn_get_token">Get Authentication Token</string>
+    <string name="header_token">Token : </string>
+    <string name="btn_get_token">Get Token</string>
+    <string name="btn_refresh_token">Refresh Token</string>
+    <string name="title_show_example">Show Examples</string>
+    <string name="title_credit_card_options">Credit Card Options</string>
+    <string name="btn_show_core">Core Flow</string>
+    <string name="btn_show_ui_flow">UI Flow</string>
     <string name="register">Register</string>
-    <string name="buy_with_core">Use Core flow</string>
-    <string name="buy_with_ui">Use UI flow</string>
+    <string name="buy_with_core">Core flow</string>
+    <string name="buy_with_ui">UI flow</string>
     <string name="buy_with_credit_card">Buy using credit card</string>
     <string name="buy_with_permata_va">Buy using Permata VA</string>
     <string name="buy_with_mandiri_bill">Buy using Mandiri Bill</string>
@@ -24,8 +30,7 @@
     <string name="activity_title_mandiri_cash">Pay with Mandiri E-Cash</string>
     <string name="activity_title_bca_klik">Pay with BCA KlikPay</string>
     <string name="activity_title_card_registration">Register Credit Card</string>
-    <string name="authentication_token_format">Authentication Token: %s</string>
-
+    <string name="activity_title_core_flow">Core Flow Examples</string>
     <string name="card_click_normal">Normal</string>
     <string name="card_click_two_click">Two Click</string>
     <string name="card_click_one_click">One Click</string>

@@ -15,10 +15,9 @@ import org.greenrobot.eventbus.Subscribe;
 import java.util.ArrayList;
 import java.util.UUID;
 
-import id.co.veritrans.sdk.activities.SaveCreditCardActivity;
 import id.co.veritrans.sdk.core.Constants;
 import id.co.veritrans.sdk.core.LocalDataHandler;
-import id.co.veritrans.sdk.core.Logger;
+import id.co.veritrans.sdk.core.PaymentMethods;
 import id.co.veritrans.sdk.core.TransactionRequest;
 import id.co.veritrans.sdk.core.VeritransBuilder;
 import id.co.veritrans.sdk.core.VeritransSDK;
@@ -30,23 +29,16 @@ import id.co.veritrans.sdk.eventbus.events.NetworkUnavailableEvent;
 import id.co.veritrans.sdk.models.BillInfoModel;
 import id.co.veritrans.sdk.models.ItemDetails;
 import id.co.veritrans.sdk.models.PaymentMethodsModel;
+import id.co.veritrans.sdk.sample.core.CoreFlowActivity;
 import id.co.veritrans.sdk.scancard.ScanCard;
 
 public class MainActivity extends AppCompatActivity implements GetAuthenticationBusCallback{
 
     ProgressDialog dialog;
     private TextView authToken;
-    private Button coreCreditButton, uiCreditButton,
-            corePermataButton, uiPermataButton,
-            coreMandiriBillButton, uiMandiriBillButton,
-            coreBCAVAButton, uiBCAVAButton,
-            coreMandiriClickButton, uiMandiriClickButton,
-            coreCIMBClickButton, uiCIMBClickButton,
-            coreIndomaretButton, uiIndomaretButton,
-            coreMandiriCashButton, uiMandiriCashButton,
-            coreBCAKlikButton, uiBCAKlikButton,
-            coreCardRegistration, uiCardRegistration,
-            getAuthenticationToken;
+    private Button coreBtn, uiBtn;
+    private Button coreCardRegistration, uiCardRegistration,
+            getAuthenticationToken, refresh_token;
     private RadioButton normal, twoClick, oneClick;
     private ArrayList<PaymentMethodsModel> selectedPaymentMethods;
 
@@ -78,6 +70,8 @@ public class MainActivity extends AppCompatActivity implements GetAuthentication
         veritransSDK.setDefaultText("open_sans_regular.ttf");
         veritransSDK.setSemiBoldText("open_sans_semibold.ttf");
         veritransSDK.setBoldText("open_sans_bold.ttf");
+
+        veritransSDK.setSelectedPaymentMethods(PaymentMethods.getAllPaymentMethods(this));
     }
 
     /**
@@ -86,17 +80,36 @@ public class MainActivity extends AppCompatActivity implements GetAuthentication
      * @return the transaction request.
      */
     private TransactionRequest initializePurchaseRequest() {
+        // Create new Transaction Request
         TransactionRequest transactionRequestNew = new
                 TransactionRequest(UUID.randomUUID().toString(), 360000);
 
-        Logger.i(" created new transaction object ");
-        ItemDetails itemDetails = new ItemDetails("1", 360000, 1, "shoes");
+        // Define item details
+        ItemDetails itemDetails = new ItemDetails("1", 120000, 1, "Trekking Shoes");
+        ItemDetails itemDetails1 = new ItemDetails("2", 100000, 1, "Casual Shoes");
+        ItemDetails itemDetails2 = new ItemDetails("3", 140000, 1, "Formal Shoes");
+
+        // Add item details into item detail list.
         ArrayList<ItemDetails> itemDetailsArrayList = new ArrayList<>();
         itemDetailsArrayList.add(itemDetails);
+        itemDetailsArrayList.add(itemDetails1);
+        itemDetailsArrayList.add(itemDetails2);
         transactionRequestNew.setItemDetails(itemDetailsArrayList);
-        // bill info
+        // Set Bill info
         BillInfoModel billInfoModel = new BillInfoModel("demo_label", "demo_value");
         transactionRequestNew.setBillInfoModel(billInfoModel);
+
+        // Create transaction request
+        String cardClickType = "";
+        if (normal.isChecked()) {
+            cardClickType = getString(R.string.card_click_type_none);
+        } else if (twoClick.isChecked()) {
+            cardClickType = getString(R.string.card_click_type_two_click);
+        } else {
+            cardClickType = getString(R.string.card_click_type_one_click);
+        }
+        transactionRequestNew.setCardPaymentInfo(cardClickType, true);
+
         return transactionRequestNew;
     }
 
@@ -115,309 +128,20 @@ public class MainActivity extends AppCompatActivity implements GetAuthentication
         twoClick = (RadioButton) findViewById(R.id.radio_card_two_click);
         oneClick = (RadioButton) findViewById(R.id.radio_card_one_click);
 
-        // Handle Credit Card Payment using Core Flow
-        coreCreditButton = (Button) findViewById(R.id.btn_credit_core);
-        coreCreditButton.setOnClickListener(new View.OnClickListener() {
+        //
+        coreBtn = (Button) findViewById(R.id.show_core_example);
+        coreBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Start credit card payment activity
-                Intent intent = new Intent(MainActivity.this, CreditCardPaymentActivity.class);
+                Intent intent = new Intent(MainActivity.this, CoreFlowActivity.class);
                 startActivity(intent);
             }
         });
-
-        // Handle Credit Card Payment using UI Flow
-        uiCreditButton = (Button) findViewById(R.id.btn_credit_ui);
-        uiCreditButton.setOnClickListener(new View.OnClickListener() {
+        uiBtn = (Button) findViewById(R.id.show_ui_flow);
+        uiBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Set Payment Model using credit card
-                ArrayList<PaymentMethodsModel> models = new ArrayList<>();
-                PaymentMethodsModel model = new PaymentMethodsModel(getString(R.string.credit_card), id.co.veritrans.sdk.R.drawable.ic_credit, Constants.PAYMENT_METHOD_NOT_SELECTED);
-                model.setIsSelected(true);
-                models.add(model);
-                selectedPaymentMethods = models;
-                VeritransSDK.getVeritransSDK().setSelectedPaymentMethods(selectedPaymentMethods);
-
-                // Create transaction request
-                String cardClickType = "";
-                if (normal.isChecked()) {
-                    cardClickType = getString(R.string.card_click_type_none);
-                } else if (twoClick.isChecked()) {
-                    cardClickType = getString(R.string.card_click_type_two_click);
-                } else {
-                    cardClickType = getString(R.string.card_click_type_one_click);
-                }
-                TransactionRequest transactionRequestNew = initializePurchaseRequest();
-                transactionRequestNew.setCardPaymentInfo(cardClickType, true);
-                // Set transaction request
-                VeritransSDK.getVeritransSDK().setTransactionRequest(transactionRequestNew);
-
-                // Start ui flow
-                VeritransSDK.getVeritransSDK().startPaymentUiFlow(MainActivity.this);
-            }
-        });
-
-        // Handle Permata VA Payment using Core Flow
-        corePermataButton = (Button) findViewById(R.id.btn_permata_core);
-        corePermataButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, PermataVAPaymentActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        // Handle Permata VA Payment using UI Flow
-        uiPermataButton = (Button) findViewById(R.id.btn_permata_ui);
-        uiPermataButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Set Payment Model using Permata VA/Bank Transfer
-                ArrayList<PaymentMethodsModel> models = new ArrayList<>();
-                PaymentMethodsModel model = new PaymentMethodsModel(getString(R.string.bank_transfer), id.co.veritrans.sdk.R.drawable.ic_atm, Constants.PAYMENT_METHOD_NOT_SELECTED);
-                model.setIsSelected(true);
-                models.add(model);
-                selectedPaymentMethods = models;
-                VeritransSDK.getVeritransSDK().setSelectedPaymentMethods(selectedPaymentMethods);
-
-                // Create transaction request
-                TransactionRequest transactionRequestNew = initializePurchaseRequest();
-                // Set transaction request
-                VeritransSDK.getVeritransSDK().setTransactionRequest(transactionRequestNew);
-
-                // Start ui flow
-                VeritransSDK.getVeritransSDK().startPaymentUiFlow(MainActivity.this);
-            }
-        });
-
-        // Handle Mandiri Bill Payment using Core Flow
-        coreMandiriBillButton = (Button) findViewById(R.id.btn_mandiri_bill_core);
-        coreMandiriBillButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, MandiriBillPaymentActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        // Handle Mandiri Bill Payment using UI Flow
-        uiMandiriBillButton = (Button) findViewById(R.id.btn_mandiri_bill_ui);
-        uiMandiriBillButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Set Payment Model using Mandiri Bill Payment
-                ArrayList<PaymentMethodsModel> models = new ArrayList<>();
-                PaymentMethodsModel model = new PaymentMethodsModel(getString(R.string.mandiri_bill_payment), id.co.veritrans.sdk.R.drawable.ic_mandiri_bill_payment2, Constants.PAYMENT_METHOD_NOT_SELECTED);
-                model.setIsSelected(true);
-                models.add(model);
-                selectedPaymentMethods = models;
-                VeritransSDK.getVeritransSDK().setSelectedPaymentMethods(selectedPaymentMethods);
-
-                // Create transaction request
-                TransactionRequest transactionRequestNew = initializePurchaseRequest();
-                // Set transaction request
-                VeritransSDK.getVeritransSDK().setTransactionRequest(transactionRequestNew);
-
-                // Start ui flow
-                VeritransSDK.getVeritransSDK().startPaymentUiFlow(MainActivity.this);
-            }
-        });
-
-        // Handle BCA VA Payment using core flow
-        coreBCAVAButton = (Button) findViewById(R.id.btn_bca_va_core);
-        coreBCAVAButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, BCAPaymentActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        // Handle BCA VA Payment using UI Flow
-        uiBCAVAButton = (Button) findViewById(R.id.btn_bca_va_ui);
-        uiBCAVAButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Set Payment Model using Permata VA/Bank Transfer
-                ArrayList<PaymentMethodsModel> models = new ArrayList<>();
-                PaymentMethodsModel model = new PaymentMethodsModel(getString(R.string.bank_transfer), id.co.veritrans.sdk.R.drawable.ic_atm, Constants.PAYMENT_METHOD_NOT_SELECTED);
-                model.setIsSelected(true);
-                models.add(model);
-                selectedPaymentMethods = models;
-                VeritransSDK.getVeritransSDK().setSelectedPaymentMethods(selectedPaymentMethods);
-
-                // Create transaction request
-                TransactionRequest transactionRequestNew = initializePurchaseRequest();
-                // Set transaction request
-                VeritransSDK.getVeritransSDK().setTransactionRequest(transactionRequestNew);
-
-                // Start ui flow
-                VeritransSDK.getVeritransSDK().startPaymentUiFlow(MainActivity.this);
-            }
-        });
-
-        // Handle Mandiri ClickPay Payment using Core Flow
-        coreMandiriClickButton = (Button) findViewById(R.id.btn_mandiri_click_core);
-        coreMandiriClickButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, MandiriClickPaymentActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        // Handle Mandiri ClickPay Payment using UI Flow
-        uiMandiriClickButton = (Button) findViewById(R.id.btn_mandiri_click_ui);
-        uiMandiriClickButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Set Payment Model using Mandiri Click Pay
-                ArrayList<PaymentMethodsModel> models = new ArrayList<>();
-                PaymentMethodsModel model = new PaymentMethodsModel(getString(R.string.mandiri_click_pay), id.co.veritrans.sdk.R.drawable.ic_mandiri2, Constants.PAYMENT_METHOD_NOT_SELECTED);
-                model.setIsSelected(true);
-                models.add(model);
-                selectedPaymentMethods = models;
-                VeritransSDK.getVeritransSDK().setSelectedPaymentMethods(selectedPaymentMethods);
-
-                // Create transaction request
-                TransactionRequest transactionRequestNew = initializePurchaseRequest();
-                // Set transaction request
-                VeritransSDK.getVeritransSDK().setTransactionRequest(transactionRequestNew);
-
-                // Start ui flow
-                VeritransSDK.getVeritransSDK().startPaymentUiFlow(MainActivity.this);
-            }
-        });
-
-        // Handle CIMB Click Payment using core flow
-        coreCIMBClickButton = (Button) findViewById(R.id.btn_cimb_click_core);
-        coreCIMBClickButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, CIMCBClickPaymentActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        // Handle CIMB Click Payment using UI Flow
-        uiCIMBClickButton = (Button) findViewById(R.id.btn_cimb_click_ui);
-        uiCIMBClickButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Set Payment Model using CIMB Click
-                ArrayList<PaymentMethodsModel> models = new ArrayList<>();
-                PaymentMethodsModel model = new PaymentMethodsModel(getString(R.string.cimb_clicks), id.co.veritrans.sdk.R.drawable.ic_cimb, Constants.PAYMENT_METHOD_NOT_SELECTED);
-                model.setIsSelected(true);
-                models.add(model);
-                selectedPaymentMethods = models;
-                VeritransSDK.getVeritransSDK().setSelectedPaymentMethods(selectedPaymentMethods);
-
-                // Create transaction request
-                TransactionRequest transactionRequestNew = initializePurchaseRequest();
-                // Set transaction request
-                VeritransSDK.getVeritransSDK().setTransactionRequest(transactionRequestNew);
-
-                // Start ui flow
-                VeritransSDK.getVeritransSDK().startPaymentUiFlow(MainActivity.this);
-            }
-        });
-
-        // Handle Indomaret Payment using Core Flow
-        coreIndomaretButton = (Button) findViewById(R.id.btn_indomaret_core);
-        coreIndomaretButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, IndomaretPaymentActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        // Handle Indomaret Payment using Core Flow
-        uiIndomaretButton = (Button) findViewById(R.id.btn_indomaret_ui);
-        uiIndomaretButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Set Payment Model using Indomaret Payment
-                ArrayList<PaymentMethodsModel> models = new ArrayList<>();
-                PaymentMethodsModel model = new PaymentMethodsModel(getString(R.string.indomaret), id.co.veritrans.sdk.R.drawable.ic_indomaret, Constants.PAYMENT_METHOD_NOT_SELECTED);
-                model.setIsSelected(true);
-                models.add(model);
-                selectedPaymentMethods = models;
-                VeritransSDK.getVeritransSDK().setSelectedPaymentMethods(selectedPaymentMethods);
-
-                // Create transaction request
-                TransactionRequest transactionRequestNew = initializePurchaseRequest();
-                // Set transaction request
-                VeritransSDK.getVeritransSDK().setTransactionRequest(transactionRequestNew);
-
-                // Start ui flow
-                VeritransSDK.getVeritransSDK().startPaymentUiFlow(MainActivity.this);
-            }
-        });
-
-        // Handle Mandiri E-Cash using Core Flow
-        coreMandiriCashButton = (Button) findViewById(R.id.btn_mandiri_cash_core);
-        coreMandiriCashButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, MandiriECashActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        // Handle Mandiri E-Cash using UI Flow
-        uiMandiriCashButton = (Button) findViewById(R.id.btn_mandiri_cash_ui);
-        uiMandiriCashButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Set Payment Model using Mandiri E cash
-                ArrayList<PaymentMethodsModel> models = new ArrayList<>();
-                PaymentMethodsModel model = new PaymentMethodsModel(getString(R.string.mandiri_e_cash), id.co.veritrans.sdk.R.drawable.ic_mandiri_e_cash, Constants.PAYMENT_METHOD_NOT_SELECTED);
-                model.setIsSelected(true);
-                models.add(model);
-                selectedPaymentMethods = models;
-                VeritransSDK.getVeritransSDK().setSelectedPaymentMethods(selectedPaymentMethods);
-
-                // Create transaction request
-                TransactionRequest transactionRequestNew = initializePurchaseRequest();
-                // Set transaction request
-                VeritransSDK.getVeritransSDK().setTransactionRequest(transactionRequestNew);
-
-                // Start ui flow
-                VeritransSDK.getVeritransSDK().startPaymentUiFlow(MainActivity.this);
-            }
-        });
-
-        // Handle BCA KlikPay using Core Flow
-        coreBCAKlikButton = (Button) findViewById(R.id.btn_bca_klik_core);
-        coreBCAKlikButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, BCAKlikPayActivity.class);
-                startActivity(intent);
-            }
-        });
-
-        // Handle BCA KlikPay using UI Flow
-        uiBCAKlikButton = (Button) findViewById(R.id.btn_bca_klik_ui);
-        uiBCAKlikButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Set Payment Model using BCA KlikPay
-                ArrayList<PaymentMethodsModel> models = new ArrayList<>();
-                PaymentMethodsModel model = new PaymentMethodsModel(getString(R.string.bca_klik), id.co.veritrans.sdk.R.drawable.ic_klikpay, Constants.PAYMENT_METHOD_NOT_SELECTED);
-                model.setIsSelected(true);
-                models.add(model);
-                selectedPaymentMethods = models;
-                VeritransSDK.getVeritransSDK().setSelectedPaymentMethods(selectedPaymentMethods);
-
-                // Create transaction request
-                TransactionRequest transactionRequestNew = initializePurchaseRequest();
-                // Set transaction request
-                VeritransSDK.getVeritransSDK().setTransactionRequest(transactionRequestNew);
-
-                // Start ui flow
+                VeritransSDK.getVeritransSDK().setTransactionRequest(initializePurchaseRequest());
                 VeritransSDK.getVeritransSDK().startPaymentUiFlow(MainActivity.this);
             }
         });
@@ -427,7 +151,7 @@ public class MainActivity extends AppCompatActivity implements GetAuthentication
         coreCardRegistration.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, SaveCreditCardActivity.class);
+                Intent intent = new Intent(MainActivity.this, CardRegistrationActivity.class);
                 startActivity(intent);
             }
         });
@@ -455,11 +179,11 @@ public class MainActivity extends AppCompatActivity implements GetAuthentication
     private void refreshAuthenticationContainer() {
         if(VeritransSDK.getVeritransSDK().readAuthenticationToken()!=null
                 && !VeritransSDK.getVeritransSDK().readAuthenticationToken().equals("")) {
-            getAuthenticationToken.setVisibility(View.GONE);
-            authToken.setText(getString(R.string.authentication_token_format, VeritransSDK.getVeritransSDK().readAuthenticationToken()));
+            getAuthenticationToken.setText(R.string.btn_refresh_token);
+            authToken.setText(VeritransSDK.getVeritransSDK().readAuthenticationToken());
         } else {
-            getAuthenticationToken.setVisibility(View.VISIBLE);
-            authToken.setText(getString(R.string.authentication_token_format, "Not Available"));
+            getAuthenticationToken.setText(R.string.btn_get_token);
+            authToken.setText("Not Available");
         }
     }
 
