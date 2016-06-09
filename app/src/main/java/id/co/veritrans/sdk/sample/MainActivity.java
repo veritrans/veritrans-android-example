@@ -200,7 +200,7 @@ public class MainActivity extends AppCompatActivity implements GetAuthentication
         refreshAuthenticationContainer();
     }
 
-    //@Subscribe
+    @Subscribe
     @Override
     public void onEvent(NetworkUnavailableEvent networkUnavailableEvent) {
         // Handle network not available condition
@@ -211,7 +211,7 @@ public class MainActivity extends AppCompatActivity implements GetAuthentication
         dialog.show();
     }
 
-    //@Subscribe
+    @Subscribe
     @Override
     public void onEvent(GeneralErrorEvent generalErrorEvent) {
         // Handle generic error condition
