@@ -35,7 +35,6 @@ import id.co.veritrans.sdk.models.ItemDetails;
 import id.co.veritrans.sdk.models.PaymentMethodsModel;
 import id.co.veritrans.sdk.sample.core.CoreFlowActivity;
 import id.co.veritrans.sdk.scancard.ScanCard;
-//import id.co.veritrans.sdk.scancard.ScanCard;
 
 public class MainActivity extends AppCompatActivity implements GetAuthenticationBusCallback, TransactionFinishedCallback {
 
