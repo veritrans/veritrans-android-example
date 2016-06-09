@@ -5,10 +5,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.greenrobot.eventbus.Subscribe;
 
@@ -23,16 +25,19 @@ import id.co.veritrans.sdk.core.VeritransBuilder;
 import id.co.veritrans.sdk.core.VeritransSDK;
 import id.co.veritrans.sdk.eventbus.bus.VeritransBusProvider;
 import id.co.veritrans.sdk.eventbus.callback.GetAuthenticationBusCallback;
+import id.co.veritrans.sdk.eventbus.callback.TransactionFinishedCallback;
 import id.co.veritrans.sdk.eventbus.events.AuthenticationEvent;
 import id.co.veritrans.sdk.eventbus.events.GeneralErrorEvent;
 import id.co.veritrans.sdk.eventbus.events.NetworkUnavailableEvent;
+import id.co.veritrans.sdk.eventbus.events.TransactionFinishedEvent;
 import id.co.veritrans.sdk.models.BillInfoModel;
 import id.co.veritrans.sdk.models.ItemDetails;
 import id.co.veritrans.sdk.models.PaymentMethodsModel;
 import id.co.veritrans.sdk.sample.core.CoreFlowActivity;
 import id.co.veritrans.sdk.scancard.ScanCard;
+//import id.co.veritrans.sdk.scancard.ScanCard;
 
-public class MainActivity extends AppCompatActivity implements GetAuthenticationBusCallback{
+public class MainActivity extends AppCompatActivity implements GetAuthenticationBusCallback, TransactionFinishedCallback {
 
     ProgressDialog dialog;
     private TextView authToken;
@@ -61,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements GetAuthentication
      */
     private void initSDK() {
         VeritransBuilder veritransBuilder = new
-                VeritransBuilder(getApplicationContext(), BuildConfig.CLIENT_KEY, BuildConfig.BASE_URL);
+                VeritransBuilder(this, BuildConfig.CLIENT_KEY, BuildConfig.BASE_URL);
         veritransBuilder.enableLog(true);
         veritransBuilder.setExternalScanner(new ScanCard());
         veritransBuilder.buildSDK();
@@ -195,7 +200,7 @@ public class MainActivity extends AppCompatActivity implements GetAuthentication
         refreshAuthenticationContainer();
     }
 
-    @Subscribe
+    //@Subscribe
     @Override
     public void onEvent(NetworkUnavailableEvent networkUnavailableEvent) {
         // Handle network not available condition
@@ -206,7 +211,7 @@ public class MainActivity extends AppCompatActivity implements GetAuthentication
         dialog.show();
     }
 
-    @Subscribe
+    //@Subscribe
     @Override
     public void onEvent(GeneralErrorEvent generalErrorEvent) {
         // Handle generic error condition
@@ -215,5 +220,12 @@ public class MainActivity extends AppCompatActivity implements GetAuthentication
                 .setMessage("Unknown error: " + generalErrorEvent.getMessage() )
                 .create();
         dialog.show();
+    }
+
+    @Subscribe
+    @Override
+    public void onEvent(TransactionFinishedEvent transactionFinishedEvent) {
+        Log.i(MainActivity.class.getSimpleName(), "Transaction Finished. ID: " + transactionFinishedEvent.getResponse().getTransactionId());
+        Toast.makeText(this, "Transaction Finished. ID: " + transactionFinishedEvent.getResponse().getTransactionId(), Toast.LENGTH_LONG).show();
     }
 }
