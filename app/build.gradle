@@ -46,15 +46,15 @@ repositories {
 }
 
 dependencies {
-    developmentCompile('id.co.veritrans:androidsdk:0.10.4-SANDBOX') {
+    developmentCompile('id.co.veritrans:androidsdk:0.10.5-SANDBOX') {
         exclude group: 'com.android.support'
     }
-    productionCompile('id.co.veritrans:androidsdk:0.10.4') {
+    productionCompile('id.co.veritrans:androidsdk:0.10.5') {
         exclude group: 'com.android.support'
     }
 
     // External scanner
-    compile('id.co.veritrans:scancard:0.10.4') {
+    compile('id.co.veritrans:scancard:0.10.5') {
         exclude module: 'androidsdk'
     }
 

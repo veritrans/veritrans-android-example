@@ -38,6 +38,7 @@ import id.co.veritrans.sdk.scancard.ScanCard;
 
 public class MainActivity extends AppCompatActivity implements GetAuthenticationBusCallback, TransactionFinishedCallback {
 
+    private static final String MERCHANT_NAME = "Veritrans Example Merchant";
     ProgressDialog dialog;
     private TextView authToken;
     private Button coreBtn, uiBtn;
@@ -65,9 +66,10 @@ public class MainActivity extends AppCompatActivity implements GetAuthentication
      */
     private void initSDK() {
         VeritransBuilder veritransBuilder = new
-                VeritransBuilder(this, BuildConfig.CLIENT_KEY, BuildConfig.BASE_URL);
-        veritransBuilder.enableLog(true);
-        veritransBuilder.setExternalScanner(new ScanCard());
+                VeritransBuilder(this, BuildConfig.CLIENT_KEY, BuildConfig.BASE_URL)
+                .enableLog(true)
+                .setMerchantName(MERCHANT_NAME)
+                .setExternalScanner(new ScanCard());
         veritransBuilder.buildSDK();
 
         VeritransSDK veritransSDK = VeritransSDK.getVeritransSDK();
