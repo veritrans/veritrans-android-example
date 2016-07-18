@@ -1,5 +1,3 @@
 # Veritrans SDK Example
 
-## Overview
-
-This is an example Android project that implements Veritrans Mobile SDK.
+This android SDK example is no longer being updated. The new sample is included in the SDK by the latest https://github.com/veritrans/veritrans-android
